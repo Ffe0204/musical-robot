@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=3.0,user-scalable=yes">
+<title>保税税收优惠向区外延伸——保税维修/检测政策演进全景</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#2c3e50}
+.header{text-align:center;padding:12px 10px 5px;background:#fff;border-bottom:1px solid #e8ecf1;flex-shrink:0}
+.header h1{font-size:clamp(14px,3vw,20px);font-weight:700;color:#1a2530;letter-spacing:.3px}
+.header h1 .hl-tax{color:#c23531}
+.header .subtitle{font-size:clamp(10px,1.6vw,12px);color:#7f8c8d;margin-top:1px}
+.header .hint{font-size:clamp(9px,1.4vw,11px);color:#5a6c7d;margin-top:2px}
+.header .legend{display:flex;flex-wrap:wrap;gap:3px 8px;justify-content:center;margin:3px auto 0;max-width:650px;font-size:clamp(9px,1.3vw,11px);color:#5a6c7d}
+.legend-item{display:inline-flex;align-items:center;gap:2px}
+.legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.legend-line{width:15px;height:2px;border-radius:1px;flex-shrink:0}
+.legend-line.dashed{border-top:2px dashed #7f8c8d;height:0;width:15px;background:transparent}
+.legend-line.thick{height:3px}
+.chart-wrap{width:100vw;overflow:auto;-webkit-overflow-scrolling:touch}
+#chart{width:1100px;height:1420px;background:#fff}
+@media(max-width:768px){
+  .header{padding:8px 8px 4px}
+  .header .legend{display:none}
+  #chart{width:900px;height:1200px}
+}
+
+/* ── Tooltip ── */
+.tt-wrap{max-width:500px;line-height:1.4}
+.tt-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px}
+.tt-hdr .tt-name{font-size:15px;font-weight:700;color:#1a2530}
+.tt-hdr .tt-badge{font-size:10px;font-weight:600;padding:1px 8px;border-radius:8px;white-space:nowrap;margin-left:6px;flex-shrink:0}
+.tt-meta{font-size:11px;color:#7f8c8d;margin-bottom:3px}
+.tt-summary{font-size:12px;color:#2c3e50;padding:4px 8px;background:#f8f9fa;border-radius:6px;margin-bottom:4px}
+.tt-graph-title{font-size:10px;font-weight:600;color:#5a6c7d;margin:2px 0 1px}
+.tt-footer{margin-top:4px;padding-top:3px;border-top:1px solid #e8ecf1;font-size:11px;color:#2b579a;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+.tt-footer a{color:#2b579a;text-decoration:none}
+.tt-hint{font-size:10px;color:#94a3b8;font-weight:400}
+@media(max-width:768px){
+  .tt-wrap{max-width:360px}
+  .tt-hdr .tt-name{font-size:13px}
+  .tt-summary{font-size:11px}
+}
+
+/* ── Mobile Modal ── */
+.mm-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2000;background:rgba(0,0,0,0.45);display:none}
+.mm-overlay.active{display:block}
+.mm-panel{position:fixed;bottom:0;left:0;width:100%;max-height:85vh;background:#fff;border-radius:16px 16px 0 0;z-index:2001;display:none;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.12)}
+.mm-panel.active{display:flex;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mm-handle{width:32px;height:3px;border-radius:2px;background:#d0d5dd;margin:6px auto 3px;flex-shrink:0}
+.mm-hdr{display:flex;justify-content:space-between;align-items:center;padding:6px 14px 6px 18px;border-bottom:1px solid #f0f2f5;flex-shrink:0}
+.mm-hdr .mm-title{font-size:14px;font-weight:700;color:#1a2530;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mm-close{width:26px;height:26px;border-radius:50%;border:none;background:#f0f2f5;font-size:14px;color:#7f8c8d;cursor:pointer;flex-shrink:0}
+.mm-body{flex:1;overflow-y:auto;padding:10px 14px 70px;-webkit-overflow-scrolling:touch}
+.mm-summary{font-size:13px;color:#2c3e50;padding:5px 8px;background:#f8f9fa;border-radius:6px;margin-bottom:6px}
+.mm-meta{font-size:11px;color:#7f8c8d;margin-bottom:4px}
+.mm-badge{display:inline-block;font-size:10px;font-weight:600;padding:1px 8px;border-radius:8px;margin-bottom:4px}
+.mm-section-title{font-size:11px;font-weight:600;color:#5a6c7d;margin:8px 0 3px}
+.mm-rel-item{display:flex;align-items:flex-start;gap:4px;padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:12px;background:#fafbfc;border:1px solid #f0f2f5}
+.mm-rel-arrow{color:#94a3b8;font-size:10px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.mm-rel-name{color:#2b579a;font-weight:500;flex:1;font-size:12px}
+.mm-rel-tag{font-size:9px;padding:0 5px;border-radius:3px;flex-shrink:0}
+.mm-clause-item{font-size:11px;padding:3px 6px;border-left:3px solid #c23531;margin-bottom:2px;background:#fef2f2;border-radius:0 3px 3px 0}
+.mm-footer{position:absolute;bottom:0;left:0;right:0;padding:6px 14px 10px;background:#fff;border-top:1px solid #e8ecf1}
+.mm-btn{display:block;width:100%;padding:9px;border:none;border-radius:8px;background:#2b579a;color:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none}
+.mm-btn:active{background:#1e3a5f}
+@media(min-width:769px){.mm-overlay,.mm-panel{display:none!important}}
+@media(max-width:576px){
+  .mm-panel{max-height:90vh}
+  .mm-body{padding:8px 12px 66px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1><span class="hl-tax">保税税收</span>优惠向区外延伸——保税维修/检测政策演进全景</h1>
+<div class="subtitle">商务部海关总署启动综保区外保税检测试点 · 7月政策研究与应对</div>
+<div class="hint">🖱 悬停查看关系图谱 · 单击打开详情文档 <span style="color:#c23531;font-weight:600;">｜手机端双击缩放</span></div>
+<div class="legend">
+<span class="legend-item"><span class="legend-dot" style="background:#1e3a5f"></span>顶层制度</span>
+<span class="legend-item"><span class="legend-dot" style="background:#2b579a"></span>部门规章</span>
+<span class="legend-item"><span class="legend-dot" style="background:#c23531"></span>新增突破</span>
+<span class="legend-item"><span class="legend-dot" style="background:#7f8c8d"></span>关联支撑</span>
+<span class="legend-item"><span class="legend-line" style="background:#2b579a"></span>制度传导</span>
+<span class="legend-item"><span class="legend-line thick" style="background:#c23531"></span>检测新赛道</span>
+<span class="legend-item"><span class="legend-line dashed"></span>关联影响</span>
+<span class="legend-item"><span style="display:inline-block;padding:0 6px;border-radius:4px;background:#c23531;color:#fff;font-size:9px;font-weight:600;">🆕</span>7月新增</span>
+</div></div>
+
+<div class="chart-wrap" id="chartWrap">
+<div id="chart"></div>
+</div>
+
+<div class="mm-overlay" id="mmOverlay"></div>
+<div class="mm-panel" id="mmPanel">
+  <div class="mm-handle"></div>
+  <div class="mm-hdr">
+    <span class="mm-title" id="mmTitle"></span>
+    <button class="mm-close" id="mmCloseBtn">✕</button>
+  </div>
+  <div class="mm-body" id="mmBody"></div>
+  <div class="mm-footer"><a class="mm-btn" id="mmDocBtn" href="#" target="_blank">📄 查看政策详情文档</a></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// 📦 数据
+// ═══════════════════════════════════════════════════════════════════
+const DOC_ROOT = './docs/';
+const FEISHU_DOCS = {};
+['0','1','2','3','5','6','7','8','9','10'].forEach(id => { FEISHU_DOCS[id] = DOC_ROOT + 'doc.html?policy='+id; });
+const SYSTEM_DOCS = {
+  '顶层制度': DOC_ROOT + 'doc.html?system=顶层制度',
+  '维修扩围': DOC_ROOT + 'doc.html?system=维修扩围',
+  '监管配套': DOC_ROOT + 'doc.html?system=监管配套',
+  '关联支撑': DOC_ROOT + 'doc.html?system=关联支撑',
+  '检测新赛道': DOC_ROOT + 'doc.html?system=检测新赛道',
+};
+
+const REL_HIGHLIGHTS = {
+  '0:s0a':{tag:'规章配套',clause:'第12条明确区内企业可开展检测维修',tc:'#6366f1'},
+  '0:s0b':{tag:'区内监管',clause:'H账册·核销≤2年·监管1371',tc:'#8b5cf6'},
+  '0:s0c':{tag:'区外监管',clause:'E账册·核销≤1年',tc:'#8b5cf6'},
+  '1:s1a':{tag:'制度授权',clause:'第14条上位法依据',tc:'#6366f1'},
+  '1:s1b':{tag:'监管框架',clause:'H账册管理框架',tc:'#8b5cf6'},
+  '1:s1c':{tag:'管理基础',clause:'综保区整体法律框架',tc:'#6366f1'},
+  '2:s2a':{tag:'扩围基线',clause:'55项首批目录对比',tc:'#0891b2'},
+  '2:s2b':{tag:'上位授权',clause:'自产产品豁免根源',tc:'#6366f1'},
+  '2:s2c':{tag:'制度衔接',clause:'自贸区政策叠加',tc:'#6366f1'},
+  '3:s3a':{tag:'上位依据',clause:'24号→3号脉络',tc:'#6366f1'},
+  '3:s3b':{tag:'下位细化',clause:'24→308细化链条',tc:'#0891b2'},
+  '5:s5a':{tag:'上位框架',clause:'24号文第13条',tc:'#6366f1'},
+  '5:s5b':{tag:'落地案例',clause:'308→7号实现纳入',tc:'#0891b2'},
+  '6:s6a':{tag:'扩围趋势',clause:'连续三次扩围',tc:'#0891b2'},
+  '6:s6b':{tag:'出口通道',clause:'国内维修直接出口',tc:'#8b5cf6'},
+  '6:s6c':{tag:'制度源头',clause:'第14条一以贯之',tc:'#6366f1'},
+  '7:s7a':{tag:'配套对象',clause:'监管覆盖全部目录',tc:'#8b5cf6'},
+  '7:s7b':{tag:'监管基础',clause:'H账册框架',tc:'#8b5cf6'},
+  '7:s7c':{tag:'制度演进',clause:'规范→智慧监管',tc:'#6366f1'},
+  '8:s8a':{tag:'监管配套',clause:'ERP联网衔接',tc:'#8b5cf6'},
+  '8:s8b':{tag:'扩围节奏',clause:'间隔约22个月',tc:'#0891b2'},
+  '8:s8c':{tag:'后续升级',clause:'扩围→负面清单',tc:'#c23531'},
+  '8:s8d':{tag:'附件清单',clause:'179项新增清单',tc:'#059669'},
+  '9:s9a':{tag:'政策前序',clause:'82号放开打基础',tc:'#0891b2'},
+  '9:s9b':{tag:'落地延伸',clause:'40号文突破产物',tc:'#c23531'},
+  '9:s9c':{tag:'演进闭环',clause:'2019奠基→2026',tc:'#6366f1'},
+  '10:s10a':{tag:'地方响应',clause:'厦门首发·截止7.9',tc:'#c23531'},
+  '10:s10b':{tag:'制度背景',clause:'40号文顶层空间',tc:'#6366f1'},
+  '10:s10c':{tag:'监管流程',clause:'E账册·核销≤1年',tc:'#8b5cf6'},
+  '10:s10d':{tag:'概念源头',clause:'保税检测7年落地',tc:'#6366f1'},
+};
+
+const L={
+  g3:'https://www.gov.cn/zhengce/zhengceku/2019-01/25/content_5361158.htm',
+  g40:'https://www.gov.cn/zhengce/zhengceku/202604/content_7066114.htm',
+  b16:'http://www.mofcom.gov.cn/zfxxgk/gkml/art/2020/art_e45fc7cc01af4b64917f74df74fbde89.html',
+  b45:'http://12335.mofcom.gov.cn/articledwmy/zcxx/qita/202112/1935505_1.html',
+  b7:'http://huangpu.customs.gov.cn/huangpu_customs/5829605/5829606/5845015/index.html',
+  b82:'http://www.mofcom.gov.cn/zfxxgk/gkml/art/2025/art_62b2e4f4a6604df78540a8071c143c4f.html',
+  n276:'https://wms.mofcom.gov.cn/zcfb/wmzc/art/2025/art_67e1ea72473e42f4ad18f09885bc5586.html',
+  n355:'https://tradeinservices.mofcom.gov.cn/article/zcfb/zcfg/202607/200003.html',
+  g24:'https://www.gov.cn/gongbao/content/2021/content_5627685.htm',
+  m308:'https://www.gov.cn/zhengce/zhengceku/202312/content_6923425.htm',
+  zgbm:'https://www.gov.cn/gongbao/content/2022/content_5682420.htm',
+  g59:'https://www.customslawyer.cn/fgk/hgtgygs/64082.shtml',
+  g203:'https://www.gov.cn/zhengce/zhengceku/2018-12/31/content_5447554.htm',
+  xiamen:'https://www.investxiamen.org.cn/detail/13233.html',
+  b82full:'https://www.mofcom.gov.cn/zfxxgk/fdzdgknr/ztfl/blgg/art/2025/art_1da1837593ad4d7ca1dc5789f60571bf.html',
+};
+
+const NODES=[
+  {id:'0',name:'国发〔2019〕3号',sub:'综合保税区高水平开放高质量发展',year:'2019.01',x:545,y:60,color:'#1e3a5f',stage:'顶层制度',badge:'奠基',
+   summary:'第14条首次明确综保区可开展保税检测和全球维修',
+   clauses:['第14条：允许综保区内企业开展高技术、高附加值、符合环保要求的保税检测和全球维修业务'],
+   feishuDoc:FEISHU_DOCS['0'],link:L.g3},
+  {id:'1',name:'2020年第16号公告',sub:'支持综保区内企业开展维修业务',year:'2020.05',x:200,y:310,color:'#2b579a',stage:'维修扩围',badge:'启动',
+   summary:'第一批维修产品目录55项，保税维修制度正式启动',
+   clauses:['55项：航空、船舶、轨交、工程机械、数控机床、通讯设备、精密电子'],
+   feishuDoc:FEISHU_DOCS['1'],link:L.b16},
+  {id:'2',name:'2021年第45号公告',sub:'维修产品增列（首次大幅扩围）',year:'2021.12',x:200,y:550,color:'#2b579a',stage:'维修扩围',badge:'扩围①',
+   summary:'首次大幅扩围，自贸试验区自产产品维修不受目录限制',
+   clauses:['增列航空器内燃引擎、无人机、B超诊断仪等','自贸试验区自产产品不受目录限制'],
+   feishuDoc:FEISHU_DOCS['2'],link:L.b45},
+  {id:'6',name:'2024年第7号公告',sub:'第三批维修产品目录',year:'2024.02',x:200,y:790,color:'#2b579a',stage:'维修扩围',badge:'扩围②',
+   summary:'第三批目录，允许国内维修后直接出口境外',
+   clauses:['第三批：飞机发动机短舱、汽车变速箱、投影仪等','允许国内维修后直接出口境外'],
+   feishuDoc:FEISHU_DOCS['6'],link:L.b7},
+  {id:'8',name:'公告2025年第82号',sub:'第四批维修产品目录（最大幅扩围）',year:'2025.12',x:200,y:1030,color:'#c23531',stage:'维修扩围',badge:'扩围③★',isNew:true,
+   summary:'新增179项累计276项，"两头在外"不受目录限制',
+   clauses:['新增179项累计276项：通信基站、铁道机车、游艇、汽车动力电池等','"两头在外"不受目录限制'],
+   feishuDoc:FEISHU_DOCS['8'],link:L.b82},
+  {id:'7',name:'商办贸函〔2025〕276号',sub:'全链条监管规范',year:'2025.03',x:780,y:790,color:'#2b579a',stage:'监管配套',badge:'监管',
+   summary:'安全生产、环保评估、ERP信息化系统等监管要求',
+   clauses:['安全生产、环境保护、海关监管评估','企业须具备ERP信息化管理系统'],
+   feishuDoc:FEISHU_DOCS['7'],link:L.n276},
+  {id:'3',name:'国办发〔2021〕24号',sub:'加快发展外贸新业态新模式',year:'2021.07',x:870,y:390,color:'#7f8c8d',stage:'关联支撑',badge:'关联',
+   summary:'第13条提升保税维修水平，动态调整目录',
+   clauses:['第13条：提升保税维修发展水平，动态调整目录','支持自贸试验区"两头在外"保税维修'],
+   feishuDoc:FEISHU_DOCS['3'],link:L.g24},
+  {id:'5',name:'商贸发〔2023〕308号',sub:'提升加工贸易发展水平',year:'2023.12',x:870,y:630,color:'#7f8c8d',stage:'关联支撑',badge:'关联',
+   summary:'将发动机短舱等纳入目录，苏州/东莞/天津试点',
+   clauses:['将飞机发动机短舱、船舶柴油发动机等纳入目录','苏州/东莞/天津"两头在外"试点'],
+   feishuDoc:FEISHU_DOCS['5'],link:L.m308},
+  {id:'9',name:'国办函〔2026〕40号',sub:'促进综合保税区扩能提质',year:'2026.04',x:545,y:1270,color:'#c23531',stage:'顶层制度',badge:'突破★',isNew:true,
+   summary:'探索负面清单管理，推进维修成品转内销',
+   clauses:['探索负面清单管理（正面清单→负面清单转型）','允许国内制造产品进区维修复运出境不受目录限制'],
+   feishuDoc:FEISHU_DOCS['9'],link:L.g40},
+  {id:'10',name:'商办服贸函〔2026〕355号★',sub:'综保区外保税检测试点（7月新增）',year:'2026.06',x:545,y:1385,color:'#c23531',stage:'检测新赛道',badge:'检测★',isNew:true,
+   summary:'综保区外试点开展消费电子"两头在外"保税检测',
+   clauses:['综保区外试点开展集成电路和消费电子"两头在外"保税检测','涵盖智能手机/平板/笔记本/智能穿戴设备'],
+   feishuDoc:FEISHU_DOCS['10'],link:L.n355}
+];
+const EDGES=[
+  {s:'0',t:'1',label:'制度授权启动',c:'#1e3a5f',w:2.5},{s:'1',t:'2',label:'首次目录扩围',c:'#2b579a',w:2.0},
+  {s:'2',t:'6',label:'持续深化扩围',c:'#2b579a',w:2.0},{s:'6',t:'8',label:'最大幅扩围',c:'#2b579a',w:2.0},
+  {s:'8',t:'9',label:'负面清单升级',c:'#c23531',w:3.0},{s:'9',t:'10',label:'税收优惠区外延伸',c:'#c23531',w:3.5},
+  {s:'7',t:'8',label:'监管配套',c:'#2b579a',w:2.0},{s:'3',t:'1',label:'制度引导',c:'#7f8c8d',w:1.5},
+  {s:'3',t:'2',label:'方向引领',c:'#7f8c8d',w:1.5},{s:'5',t:'6',label:'加工贸易支撑',c:'#7f8c8d',w:1.5}
+];
+
+const SUB={};
+SUB['0']={nodes:[
+  {id:'s0a',name:'海关综合保税区管理办法（海关总署令第256号）',dept:'海关总署',yr:'2022',d:'第12条明确区内企业可开展检测维修',link:L.zgbm},
+  {id:'s0b',name:'区内保税维修监管公告（海关2015年第59号）',dept:'海关总署',yr:'2015',d:'H账册·核销≤2年·监管方式1371',link:L.g59},
+  {id:'s0c',name:'区外保税维修监管公告（海关2018年第203号）',dept:'海关总署',yr:'2018',d:'E账册·核销≤1年',link:L.g203}],
+links:[{s:'center',t:'s0a',label:'管理依据'},{s:'center',t:'s0b',label:'区内配套'},{s:'center',t:'s0c',label:'区外配套'}]};
+SUB['1']={nodes:[
+  {id:'s1a',name:'国发〔2019〕3号',dept:'国务院',yr:'2019',d:'第14条上位法依据',link:L.g3},
+  {id:'s1b',name:'区内保税维修监管公告（海关2015年第59号）',dept:'海关总署',yr:'2015',d:'H账册管理框架',link:L.g59},
+  {id:'s1c',name:'海关综合保税区管理办法（海关总署令第256号）',dept:'海关总署',yr:'2022',d:'综保区整体法律框架',link:L.zgbm}],
+links:[{s:'center',t:'s1a',label:'授权依据'},{s:'center',t:'s1b',label:'监管框架'},{s:'center',t:'s1c',label:'管理基础'}]};
+SUB['2']={nodes:[
+  {id:'s2a',name:'2020年第16号公告 首批目录',dept:'商务部等',yr:'2020',d:'55项首批目录基线',link:L.b16},
+  {id:'s2b',name:'国发〔2019〕3号',dept:'国务院',yr:'2019',d:'自产产品豁免上位法依据',link:L.g3},
+  {id:'s2c',name:'海关综保区管理办法（海关总署令第256号）',dept:'海关总署',yr:'2022',d:'自贸区监管创新空间',link:L.zgbm}],
+links:[{s:'center',t:'s2a',label:'前序基础'},{s:'center',t:'s2b',label:'上位授权'},{s:'center',t:'s2c',label:'制度衔接'}]};
+SUB['6']={nodes:[
+  {id:'s6a',name:'2021年第45号公告（首次扩围）',dept:'商务部等',yr:'2021',d:'直接前序',link:L.b45},
+  {id:'s6b',name:'区外保税维修监管公告（海关2018年第203号）',dept:'海关总署',yr:'2018',d:'国内维修直接出口通道',link:L.g203},
+  {id:'s6c',name:'国发〔2019〕3号',dept:'国务院',yr:'2019',d:'制度源头·第14条',link:L.g3}],
+links:[{s:'center',t:'s6a',label:'前序扩围'},{s:'center',t:'s6b',label:'出口监管'},{s:'center',t:'s6c',label:'制度源头'}]};
+SUB['8']={nodes:[
+  {id:'s8a',name:'商办贸函〔2025〕276号 监管规范',dept:'商务部办公厅等',yr:'2025',d:'ERP联网·环保评估',link:L.n276},
+  {id:'s8b',name:'2024年第7号公告 第三批目录',dept:'商务部等',yr:'2024',d:'直接前序',link:L.b7},
+  {id:'s8c',name:'国办函〔2026〕40号',dept:'国务院办公厅',yr:'2026',d:'后续制度升级',link:L.g40},
+  {id:'s8d',name:'第四批目录完整清单附件',dept:'商务部',yr:'2025',d:'179项新增完整清单',link:L.b82full}],
+links:[{s:'center',t:'s8a',label:'监管配套'},{s:'center',t:'s8b',label:'前次扩围'},{s:'center',t:'s8c',label:'后续升级'},{s:'center',t:'s8d',label:'附件清单'}]};
+SUB['9']={nodes:[
+  {id:'s9a',name:'公告2025年第82号（最大幅扩围）',dept:'商务部等',yr:'2025',d:'"两头在外"放开打基础',link:L.b82},
+  {id:'s9b',name:'商办服贸函〔2026〕355号',dept:'商务部办公厅等',yr:'2026',d:'制度突破直接产物',link:L.n355},
+  {id:'s9c',name:'国发〔2019〕3号',dept:'国务院',yr:'2019',d:'2019→2026演进闭环',link:L.g3}],
+links:[{s:'center',t:'s9a',label:'政策前序'},{s:'center',t:'s9b',label:'延伸落地'},{s:'center',t:'s9c',label:'演进源头'}]};
+SUB['10']={nodes:[
+  {id:'s10a',name:'★厦门市商务局 征集试点通知',dept:'厦门市商务局',yr:'2026',d:'全国首批·截止7.9',link:L.xiamen},
+  {id:'s10b',name:'国办函〔2026〕40号',dept:'国务院办公厅',yr:'2026',d:'顶层制度创新空间',link:L.g40},
+  {id:'s10c',name:'区外保税货物监管公告（海关2018年第203号）',dept:'海关总署',yr:'2018',d:'E账册·核销≤1年',link:L.g203},
+  {id:'s10d',name:'国发〔2019〕3号',dept:'国务院',yr:'2019',d:'首次提出"保税检测"概念',link:L.g3}],
+links:[{s:'center',t:'s10a',label:'地方响应'},{s:'center',t:'s10b',label:'制度背景'},{s:'center',t:'s10c',label:'监管流程'},{s:'center',t:'s10d',label:'概念源头'}]};
+SUB['7']={nodes:[
+  {id:'s7a',name:'公告2025年第82号（第四批目录）',dept:'商务部等',yr:'2025',d:'监管覆盖全部目录产品',link:L.b82},
+  {id:'s7b',name:'区内保税维修监管公告（海关2015年第59号）',dept:'海关总署',yr:'2015',d:'H账册管理框架基础',link:L.g59},
+  {id:'s7c',name:'国办函〔2026〕40号',dept:'国务院办公厅',yr:'2026',d:'规范→智慧监管演进',link:L.g40}],
+links:[{s:'center',t:'s7a',label:'配套对象'},{s:'center',t:'s7b',label:'监管基础'},{s:'center',t:'s7c',label:'制度演进'}]};
+SUB['3']={nodes:[
+  {id:'s3a',name:'国发〔2019〕3号',dept:'国务院',yr:'2019',d:'第14条的延伸和具体化',link:L.g3},
+  {id:'s3b',name:'商贸发〔2023〕308号',dept:'商务部',yr:'2023',d:'细化第二批试点安排',link:L.m308}],
+links:[{s:'center',t:'s3a',label:'上位依据'},{s:'center',t:'s3b',label:'下位细化'}]};
+SUB['5']={nodes:[
+  {id:'s5a',name:'国办发〔2021〕24号',dept:'国务院办公厅',yr:'2021',d:'第13条提升保税维修',link:L.g24},
+  {id:'s5b',name:'2024年第7号公告 第三批目录',dept:'商务部等',yr:'2024',d:'308号→7号目录实现纳入',link:L.b7}],
+links:[{s:'center',t:'s5a',label:'上位框架'},{s:'center',t:'s5b',label:'落地案例'}]};
+
+// ═══════════════════════════════════════════════════════════════════
+// 🛠 工具
+// ═══════════════════════════════════════════════════════════════════
+const isMobile = () => window.innerWidth < 768;
+
+function getRelated(nodeId) {
+  const sub = SUB[nodeId];
+  if(!sub || !sub.links) return [];
+  return sub.links.map(l => {
+    const tid = l.s==='center' ? l.t : (l.t==='center' ? l.s : l.t);
+    const n = sub.nodes.find(x => x.id===tid);
+    if(!n) return null;
+    const hk = nodeId+':'+n.id, hl = REL_HIGHLIGHTS[hk]||{tag:'',clause:'',tc:'#94a3b8'};
+    return { fn: n.name.replace(/\n/g,' '), rel: l.label.replace(/[▶→]/g,''), clause: hl.clause, tag: hl.tag, tc: hl.tc, url: n.link };
+  }).filter(Boolean);
+}
+
+// ── SVG 径向关系图谱（中文适配 + 大半径避免重叠）───────────────
+function buildSVG(centerName, centerColor, links, maxN) {
+  const N = Math.min(links.length, maxN||5);
+  if(N===0) return '';
+
+  const W=680, H=400, cx=330, cy=210, R=170;
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:4px auto 0;">`;
+  s+=`<defs><filter id="sg"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.12"/></filter></defs>`;
+
+  // 中心节点
+  const cw=150, ch=34;
+  s+=`<rect x="${cx-cw/2}" y="${cy-ch/2}" width="${cw}" height="${ch}" rx="8" fill="${centerColor}" filter="url(#sg)"/>`;
+  s+=`<text x="${cx}" y="${cy+5}" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">${centerName}</text>`;
+
+  for(let i=0; i<N; i++){
+    const a = (i/N)*2*Math.PI - Math.PI/2;
+    const nx = cx + R*Math.cos(a), ny = cy + R*Math.sin(a);
+    const r = links[i];
+
+    // 连接线
+    s+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#c8d6e5" stroke-width="1.2" stroke-dasharray="5,3"/>`;
+
+    // 关系标签（无背景框，文字直接浮在线上，白描边确保可读）
+    const lx = cx + (nx-cx)*0.50;
+    const ly = cy + (ny-cy)*0.50;
+    s+=`<text x="${lx}" y="${ly+4}" text-anchor="middle" fill="#5a7c9a" font-size="9" font-weight="600" stroke="#fff" stroke-width="2.5" paint-order="stroke">${r.rel}</text>`;
+
+    // 关联节点（中文适配：每字11px）
+    const nm = r.fn.length>10 ? r.fn.slice(0,9)+'…' : r.fn;
+    const nw = Math.max(nm.length*11+14, 80); // 中文宽11px/字
+    const nh = 24;
+    let nnx = nx, nnw = nw;
+    if(nx-nw/2<5) nnx = nw/2+5;
+    if(nx+nw/2>W-5) nnx = W-5-nw/2;
+    s+=`<rect x="${nnx-nnw/2}" y="${ny-nh/2}" width="${nnw}" height="${nh}" rx="6" fill="#f0f5ff" stroke="#c8d6e5" stroke-width="1"/>`;
+    s+=`<text x="${nnx}" y="${ny+5}" text-anchor="middle" fill="#2b579a" font-size="11" font-weight="600">${nm}</text>`;
+
+    // 高亮标签（小号紧凑）
+    if(r.tag){
+      const tw=r.tag.length*8+8, th=13;
+      let tx = nx>cx ? nnx+nnw/2+4 : nnx-nnw/2-4-tw;
+      if(tx<2) tx=2;
+      if(tx+tw>W-4) tx=W-4-tw;
+      s+=`<rect x="${tx}" y="${ny-6}" width="${tw}" height="${th}" rx="3" fill="${r.tc}18" stroke="${r.tc}30" stroke-width="0.5"/>`;
+      s+=`<text x="${tx+tw/2}" y="${ny+4}" text-anchor="middle" fill="${r.tc}" font-size="8" font-weight="600">${r.tag}</text>`;
+    }
+
+    // 条款批注
+    if(r.clause){
+      s+=`<text x="${nnx}" y="${ny+nh/2+14}" text-anchor="middle" fill="#c23531" font-size="8">⚑ ${r.clause.length>16?r.clause.slice(0,15)+'…':r.clause}</text>`;
+    }
+  }
+  s+='</svg>';
+  return s;
+}
+
+// ── Tooltip HTML ──
+function buildTip(node){
+  const links = getRelated(node.id);
+  const bc = node.isNew?'#c23531':'#2b579a', bg = node.isNew?'rgba(194,53,49,0.12)':'rgba(43,87,154,0.1)';
+  const maxG = isMobile()?3:5;
+  let h='<div class="tt-wrap">';
+  h+=`<div class="tt-hdr"><span class="tt-name">${node.name}</span><span class="tt-badge" style="background:${bg};color:${bc}">${node.stage}</span></div>`;
+  h+=`<div class="tt-meta">${node.sub} · ${node.year}${node.badge?' · '+node.badge:''}</div>`;
+  h+=`<div class="tt-summary">${node.summary}</div>`;
+  if(links.length) {
+    h+=`<div class="tt-graph-title">🔗 以「${node.name}」为中心的关系图谱</div>`;
+    h+=buildSVG(node.name, node.color, links, maxG);
+  }
+  h+=`<div class="tt-footer"><a href="${node.feishuDoc}" target="_blank">📄 详情文档 →</a><span class="tt-hint">单击跳转</span></div></div>`;
+  return h;
+}
+
+// ── Mobile Modal ──
+function buildMob(node){
+  const links = getRelated(node.id);
+  const bc=node.isNew?'#c23531':'#2b579a', bg=node.isNew?'rgba(194,53,49,0.12)':'rgba(43,87,154,0.1)';
+  let h=`<div class="mm-badge" style="background:${bg};color:${bc}">${node.stage} · ${node.badge||''}</div>`;
+  h+=`<div class="mm-meta">${node.sub} · ${node.year}</div><div class="mm-summary">${node.summary}</div>`;
+  if(node.clauses&&node.clauses.length){
+    h+='<div class="mm-section-title">📋 关键条款</div>';
+    h+=`<div class="mm-clause-item">${node.clauses[0]}</div>`;
+  }
+  if(links.length){
+    h+='<div class="mm-section-title">🔗 关联政策（手机端仅展示前4项）</div>';
+    links.slice(0,4).forEach(r=>{
+      const ts=r.tc?`background:${r.tc}15;color:${r.tc}`:'background:#f0f2f5;color:#5a6c7d';
+      h+=`<div class="mm-rel-item"><span class="mm-rel-arrow">◀ ${r.rel} ▶</span><span class="mm-rel-name">${r.fn}</span>${r.tag?`<span class="mm-rel-tag" style="${ts}">${r.tag}</span>`:''}</div>`;
+      if(r.clause) h+=`<div style="font-size:10px;color:#c23531;padding:0 8px 2px 24px;margin-top:-1px;">⚑ ${r.clause}</div>`;
+    });
+  }
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 🎨 主图渲染
+// ═══════════════════════════════════════════════════════════════════
+const ZB=[];
+const AZ = (x,y,w,h,label,color,lc) => {
+  ZB.push({type:'rect',shape:{x,y,w,h},style:{fill:'rgba(0,0,0,0)',stroke:color,lineWidth:1.2,lineDash:[5,3],borderRadius:8},z:0},
+    {type:'text',style:{text:'▼ '+label,x:x+11,y:y+15,textAlign:'left',fill:lc,fontSize:11,fontWeight:600},z:1});
+};
+AZ(100,270,270,810,'维修扩围主干','rgba(43,87,154,0.2)','rgba(43,87,154,0.4)');
+AZ(770,355,220,325,'关联支撑','rgba(127,140,141,0.2)','rgba(127,140,141,0.35)');
+AZ(680,753,200,90,'监管配套','rgba(43,87,154,0.15)','rgba(43,87,154,0.3)');
+AZ(400,25,290,60,'顶层制度','rgba(30,58,95,0.2)','rgba(30,58,95,0.35)');
+AZ(400,1235,290,60,'顶层制度','rgba(194,53,49,0.15)','rgba(194,53,49,0.3)');
+AZ(400,1350,290,60,'检测新赛道（2026年7月新增）','rgba(194,53,49,0.2)','rgba(194,53,49,0.4)');
+
+const chart = echarts.init(document.getElementById('chart'));
+const opt = {
+  backgroundColor:'transparent', graphic:ZB,
+  tooltip:{ trigger:'item', enterable:true, confine:true, hideDelay:150,
+    backgroundColor:'#fff', borderColor:'#e8ecf1', borderWidth:1, padding:[10,12],
+    extraCssText:'border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,0.1);max-width:720px;',
+    formatter: p=>{ if(p.dataType!=='node'||!p.data.raw) return ''; if(isMobile()) return ''; return buildTip(p.data.raw); }
+  },
+  animationDuration:0,
+  series:[{
+    type:'graph', layout:'none', roam:isMobile(),
+    symbol:'roundRect',
+    symbolSize: function(v,p){
+      const d=p.data.raw; return isMobile()?[130,38]:[172,48];
+    },
+    label:{ show:true, position:'inside',
+      formatter: p=>{const d=p.data.raw; return `{n|${d.name}}\n{y|${d.year} ${d.badge||''}}`;},
+      rich:{ n:{fontSize:isMobile()?10:12,fontWeight:700,color:'#fff',lineHeight:isMobile()?14:18},
+             y:{fontSize:isMobile()?7:9,color:'rgba(255,255,255,0.6)',lineHeight:isMobile()?9:12} },
+      textPadding:isMobile()?[2,4,1,4]:[4,8,4,8]
+    },
+    edgeLabel:{ show:!isMobile(), rotate:0, formatter:p=>p.data.label||'',
+      color:'#4a6a8a', backgroundColor:'transparent',
+      borderWidth:0, padding:0, borderRadius:0, fontSize:10, fontWeight:500
+    },
+    edgeSymbol:['none','arrow'], edgeSymbolSize:[0,9],
+    data: NODES.map(n=>({
+      id:n.id, name:n.name, x:n.x, y:n.y, raw:n,
+      itemStyle:{ color:n.color, shadowBlur:n.isNew?22:6,
+        shadowColor:n.isNew?'rgba(194,53,49,0.35)':'rgba(0,0,0,0.08)',
+        borderColor:n.isNew?'#fbbf24':'rgba(255,255,255,0.2)', borderWidth:n.isNew?2:1.2 },
+      emphasis:{ itemStyle:{shadowBlur:26,borderColor:'#fff',borderWidth:2.2}, label:{fontSize:13,fontWeight:700} }
+    })),
+    links: EDGES.map(e=>({source:e.s,target:e.t,label:e.label,
+      lineStyle:{color:e.c,width:e.w,curveness:0.05,opacity:0.8}})),
+    lineStyle:{curveness:0.05}
+  }]
+};
+chart.setOption(opt);
+
+// ═══ 交互 ═══════════════════════════════════════════════════
+chart.on('click', function(p){
+  if(p.dataType!=='node'||!p.data||!p.data.raw) return;
+  const n = p.data.raw;
+  if(isMobile()){ showMob(n); }
+  else if(n.feishuDoc){ window.open(n.feishuDoc,'_blank'); }
+});
+
+function showMob(node){
+  document.getElementById('mmTitle').textContent = node.name;
+  document.getElementById('mmBody').innerHTML = buildMob(node);
+  document.getElementById('mmDocBtn').href = node.feishuDoc||'#';
+  document.getElementById('mmOverlay').classList.add('active');
+  document.getElementById('mmPanel').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function hideMob(){
+  document.getElementById('mmOverlay').classList.remove('active');
+  document.getElementById('mmPanel').classList.remove('active');
+  document.body.style.overflow='';
+}
+document.getElementById('mmCloseBtn').addEventListener('click', hideMob);
+document.getElementById('mmOverlay').addEventListener('click', hideMob);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') hideMob(); });
+
+// 呼吸光效
+(function(){ let ph=0; setInterval(()=>{
+  ph=(ph+1)%60; const g=16+Math.sin(ph/60*Math.PI*2)*10, bw=2+Math.sin(ph/60*Math.PI*2)*0.35;
+  const nd=NODES.map((n,i)=>n.isNew?{...opt.series[0].data[i],itemStyle:{...opt.series[0].data[i].itemStyle,shadowBlur:g,borderWidth:bw}}:opt.series[0].data[i]);
+  chart.setOption({series:[{data:nd}]});
+},90);})();
+
+// 快速索引
+(function(){
+  const c=document.createElement('div');
+  c.style.cssText='max-width:760px;margin:12px auto;padding:0 12px 24px;';
+  c.innerHTML='<div style="font-size:12px;font-weight:600;color:#5a6c7d;margin-bottom:5px;">📋 政策索引（单击跳转详情文档）</div>';
+  const g=document.createElement('div');
+  g.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:4px;';
+  [...NODES].sort((a,b)=>a.y-b.y).forEach(n=>{
+    const a=document.createElement('a'); a.href=n.feishuDoc; a.target='_blank';
+    a.style.cssText='display:flex;align-items:center;gap:4px;padding:3px 7px;background:#fff;border-radius:5px;text-decoration:none;font-size:11px;color:#2c3e50;border:1px solid #e8ecf1;';
+    a.onmouseover=function(){this.style.boxShadow='0 1px 4px rgba(0,0,0,0.05)';};
+    a.onmouseout=function(){this.style.boxShadow='none';};
+    const d=document.createElement('span');
+    d.style.cssText=`width:6px;height:6px;border-radius:50%;background:${n.color};flex-shrink:0;`;
+    const l=document.createElement('span'); l.textContent=n.name;
+    if(n.isNew){const b=document.createElement('span');b.style.cssText='font-size:8px;padding:0 4px;border-radius:3px;background:#c23531;color:#fff;margin-left:3px;';b.textContent='🆕';l.appendChild(b);}
+    a.appendChild(d); a.appendChild(l); g.appendChild(a);
+  });
+  c.appendChild(g); document.body.appendChild(c);
+})();
+</script>
+</body>
+</html>
